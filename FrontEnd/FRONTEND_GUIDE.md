@@ -119,36 +119,44 @@ export default Navbar
 Goal: Hero section + featured games
 
 ```jsx
-import { useEffect, useState } from 'react'
-import axios from 'axios'
-import GameCard from '../components/GameCard'
+import { Link } from 'react-router-dom'
+import cupheadImg from "../assets/Cuphead.jpg";
+import eldenImg from "../assets/eldenring.jpg";
+import GoWImg from "../assets/GoW.jpg";
+import cyberImg from "../assets/cyberpunk.jpg";
 
 function Home() {
-  const [featured, setFeatured] = useState([])
-
-  useEffect(() => {
-    // Like ngOnInit in Angular
-    axios.get('http://localhost:5000/api/games')
-      .then(res => setFeatured(res.data.data.slice(0, 4)))
-      .catch(err => console.error(err))
-  }, [])
+  const featured = [
+    { id: 1, title: "Cuphead", price: 19.99, genre: "Run and Gun Action", image: cupheadImg },
+    { id: 2, title: "Elden Ring", price: 59.99, genre: "Action RPG", image: eldenImg },
+    { id: 3, title: "God of War", price: 49.99, genre: "Action-Adventure", image: GoWImg },
+    { id: 4, title: "CyberPunk 2077", price: 59.99, genre: "RPG", image: cyberImg },
+  ]
 
   return (
     <div>
       {/* Hero Section */}
       <div className="bg-dark text-white text-center py-5">
-        <h1>Welcome to Game Store</h1>
-        <p>Your one-stop shop for all games</p>
-        <a href="/catalog" className="btn btn-success btn-lg">Browse Games</a>
+        <h1>Welcome to Game Store 🎮</h1>
+        <p className="lead">Your one-stop shop for all games</p>
+        <Link to="/catalog" className="btn btn-success btn-lg">Browse Games</Link>
       </div>
 
       {/* Featured Games */}
       <div className="container my-5">
-        <h2>Featured Games</h2>
+        <h2 className="mb-4">Featured Games</h2>
         <div className="row">
           {featured.map(game => (
-            <div className="col-md-3" key={game.id}>
-              <GameCard game={game} />
+            <div className="col-md-3 mb-4" key={game.id}>
+              <div className="card h-100">
+                <img src={game.image} className="card-img-top" alt={game.title} />
+                <div className="card-body">
+                  <h5 className="card-title">{game.title}</h5>
+                  <p className="text-muted">{game.genre}</p>
+                  <p className="text-success">${game.price}</p>
+                  <Link to={`/game/${game.id}`} className="btn btn-dark w-100">View</Link>
+                </div>
+              </div>
             </div>
           ))}
         </div>

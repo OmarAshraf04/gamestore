@@ -1,12 +1,7 @@
 import { Link } from 'react-router-dom'
+import games from '../data/game'
 
 function Home() {
-  const featured = [
-    { id: 1, title: "Elden Ring", price: 59.99, category: "RPG", image: "https://placehold.co/300x200" },
-    { id: 2, title: "FIFA 25", price: 49.99, category: "Sports", image: "https://placehold.co/300x200" },
-    { id: 3, title: "GTA VI", price: 69.99, category: "Action", image: "https://placehold.co/300x200" },
-    { id: 4, title: "Minecraft", price: 29.99, category: "Sandbox", image: "https://placehold.co/300x200" },
-  ]
 
   return (
     <div>
@@ -21,13 +16,13 @@ function Home() {
       <div className="container my-5">
         <h2 className="mb-4">Featured Games</h2>
         <div className="row">
-          {featured.map(game => (
+          {games.map(game => (
             <div className="col-md-3 mb-4" key={game.id}>
               <div className="card h-100">
                 <img src={game.image} className="card-img-top" alt={game.title} />
                 <div className="card-body">
                   <h5 className="card-title">{game.title}</h5>
-                  <p className="text-muted">{game.category}</p>
+                  <p className="text-muted">{game.genre}</p>
                   <p className="text-success">${game.price}</p>
                   <Link to={`/game/${game.id}`} className="btn btn-dark w-100">View</Link>
                 </div>
