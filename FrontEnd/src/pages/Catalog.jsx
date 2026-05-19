@@ -1,14 +1,19 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import games from '../data/game'
+import { useEffect, useState } from 'react'
+import axios from 'axios'
 import GameCard from '../components/GameCard'
 
 function Catalog() {
-
+  const [games, setGames] = useState([])
   const [search, setSearch] = useState('')
   const [request, setRequest] = useState({ title: '', platform: '', reason: '' })
   const [submitted, setSubmitted] = useState(false)
   const [errors, setErrors] = useState({})
+
+  useEffect(() => {
+    axios.get('http://localhost:5000/api/games')
+      .then(res => setGames(res.data.data))
+      .catch(err => console.error(err))
+  }, [])
 
   const filtered = games.filter(g =>
     g.title.toLowerCase().includes(search.toLowerCase())
@@ -35,7 +40,6 @@ function Catalog() {
     <div className="container my-4">
       <h2 className="d-flex justify-content-center mb-4">All Games</h2>
 
-      {/* Search Bar */}
       <div className="d-flex justify-content-center mb-4">
         <div className="input-group" style={{ maxWidth: '400px' }}>
           <input
@@ -44,21 +48,18 @@ function Catalog() {
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
-          <span className="input-group-text">
-            🔍
-          </span>
+          <span className="input-group-text">🔍</span>
         </div>
       </div>
 
       <div className="row">
         {filtered.map(game => (
-          <div className="col-md-3 mb-4" key={game.id}>
+          <div className="col-md-3 mb-4" key={game._id}>
             <GameCard game={game} />
           </div>
         ))}
       </div>
 
-      {/* Request a Game Form */}
       <div className="mt-5">
         <h3 className="d-flex justify-content-center mb-4">Can't find a game? Request it!</h3>
         <div className="d-flex justify-content-center">
