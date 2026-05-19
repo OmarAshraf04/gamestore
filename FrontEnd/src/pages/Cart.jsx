@@ -42,20 +42,30 @@ function Cart() {
 
   if (loading) return <p className="text-center mt-5">Loading...</p>
   const placeOrder = async () => {
-  try {
-    await axios.post('http://localhost:5000/api/orders',
-      {
-        cartItems: cart.map(item => ({ game: item.game._id, quantity: item.quantity })),
-        totalPrice: total
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    )
-    setCart([])
-    alert('Order placed successfully!')
-  } catch (err) {
-    alert('Something went wrong placing your order')
+    try {
+      await axios.post('http://localhost:5000/api/orders',
+        {
+          cartItems: cart.map(item => ({ game: item.game._id, quantity: item.quantity })),
+          totalPrice: total
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+
+      // Remove each item from cart in the database
+      await Promise.all(
+        cart.map(item =>
+          axios.delete(`http://localhost:5000/api/cart/${item.game._id}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        )
+      )
+
+      setCart([])
+      alert('Order placed successfully!')
+    } catch (err) {
+      alert('Something went wrong placing your order')
+    }
   }
-}
   return (
     <div className="container my-5">
       <h2 className="mb-4">Your Cart</h2>
