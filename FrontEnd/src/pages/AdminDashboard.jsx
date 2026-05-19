@@ -172,9 +172,9 @@ function AdminDashboard() {
               <table className="table table-bordered table-hover align-middle">
                 <thead className="table-dark">
                   <tr>
-                    <th>Image</th>
+                    <th className="d-none d-md-table-cell">Image</th>
                     <th>Title</th>
-                    <th>Category</th>
+                    <th className="d-none d-md-table-cell">Category</th>
                     <th>Price</th>
                     <th>Actions</th>
                   </tr>
@@ -183,7 +183,7 @@ function AdminDashboard() {
                   {games.map(game => (
                     <React.Fragment key={game._id}>
                       <tr>
-                        <td style={{ width: '70px' }}>
+                        <td className="d-none d-md-table-cell" style={{ width: '70px' }}>
                           <img
                             src={game.image}
                             alt={game.title}
@@ -191,7 +191,7 @@ function AdminDashboard() {
                           />
                         </td>
                         <td>{game.title}</td>
-                        <td><span className="badge bg-secondary">{game.category}</span></td>
+                        <td className="d-none d-md-table-cell"><span className="badge bg-secondary">{game.category}</span></td>
                         <td className="text-success fw-bold">${game.price}</td>
                         <td>
                           <button

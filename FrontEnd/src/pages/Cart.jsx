@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
+import { CheckCircle, XCircle } from 'lucide-react'
 
 function Cart() {
   const [cart, setCart] = useState([])
   const [loading, setLoading] = useState(true)
+  const [orderSuccess, setOrderSuccess] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
   const token = localStorage.getItem('token')
 
   useEffect(() => {
@@ -34,13 +37,6 @@ function Cart() {
 
   const total = cart.reduce((sum, item) => sum + item.game.price * item.quantity, 0)
 
-  if (!token) return (
-    <div className="container my-5 text-center">
-      <h4>Please <Link to="/login">login</Link> to view your cart</h4>
-    </div>
-  )
-
-  if (loading) return <p className="text-center mt-5">Loading...</p>
   const placeOrder = async () => {
     try {
       await axios.post('http://localhost:5000/api/orders',
@@ -50,8 +46,6 @@ function Cart() {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       )
-
-      // Remove each item from cart in the database
       await Promise.all(
         cart.map(item =>
           axios.delete(`http://localhost:5000/api/cart/${item.game._id}`, {
@@ -59,16 +53,43 @@ function Cart() {
           })
         )
       )
-
       setCart([])
-      alert('Order placed successfully!')
+      setOrderSuccess(true)
+      setTimeout(() => setOrderSuccess(false), 4000)
     } catch (err) {
-      alert('Something went wrong placing your order')
+      setErrorMsg('Something went wrong placing your order')
+      setTimeout(() => setErrorMsg(''), 4000)
     }
   }
+
+  if (!token) return (
+    <div className="container my-5 text-center">
+      <h4>Please <Link to="/login">login</Link> to view your cart</h4>
+    </div>
+  )
+
+  if (loading) return <p className="text-center mt-5">Loading...</p>
+
   return (
     <div className="container my-5">
       <h2 className="mb-4">Your Cart</h2>
+
+      {orderSuccess && (
+        <div className="alert alert-success alert-dismissible d-flex align-items-center gap-2" role="alert">
+          <CheckCircle size={18} />
+          <span>Order placed successfully! Check your order history.</span>
+          <button type="button" className="btn-close ms-auto" onClick={() => setOrderSuccess(false)}></button>
+        </div>
+      )}
+
+      {errorMsg && (
+        <div className="alert alert-danger alert-dismissible d-flex align-items-center gap-2" role="alert">
+          <XCircle size={18} />
+          <span>{errorMsg}</span>
+          <button type="button" className="btn-close ms-auto" onClick={() => setErrorMsg('')}></button>
+        </div>
+      )}
+
       {cart.length === 0 ? (
         <div className="text-center">
           <p>Your cart is empty</p>
