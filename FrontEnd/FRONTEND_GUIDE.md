@@ -174,104 +174,51 @@ export default Home
 Goal: Show all games, search filter + Request a Game form ✅ (Form 1)
 
 ```jsx
-import { useEffect, useState } from 'react'
-import axios from 'axios'
-import GameCard from '../components/GameCard'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import games from '../data/games'
 
 function Catalog() {
-  const [games, setGames] = useState([])
   const [search, setSearch] = useState('')
-  const [request, setRequest] = useState({ title: '', platform: '', reason: '' })
-  const [submitted, setSubmitted] = useState(false)
-  const [errors, setErrors] = useState({})
-
-  useEffect(() => {
-    axios.get('http://localhost:5000/api/games')
-      .then(res => setGames(res.data.data))
-      .catch(err => console.error(err))
-  }, [])
 
   const filtered = games.filter(g =>
     g.title.toLowerCase().includes(search.toLowerCase())
   )
 
-  const validate = () => {
-    const newErrors = {}
-    if (!request.title.trim()) newErrors.title = 'Game title is required'
-    if (!request.platform.trim()) newErrors.platform = 'Platform is required'
-    return newErrors
-  }
-
-  const handleRequest = (e) => {
-    e.preventDefault()
-    const newErrors = validate()
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
-      return
-    }
-    axios.post('http://localhost:5000/api/games/request', request)
-      .then(() => setSubmitted(true))
-      .catch(err => console.error(err))
-  }
-
   return (
     <div className="container my-4">
-      <h2>All Games</h2>
+      <h2 className="mb-4">All Games</h2>
 
       {/* Search Bar */}
-      <input
-        className="form-control mb-4"
-        placeholder="Search games..."
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-      />
+      <div className="d-flex justify-content-center mb-4">
+        <div className="input-group" style={{ maxWidth: '400px' }}>
+          <input
+            className="form-control"
+            placeholder="Search games..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          <span className="input-group-text">🔍</span>
+        </div>
+      </div>
 
       <div className="row">
         {filtered.map(game => (
           <div className="col-md-3 mb-4" key={game.id}>
-            <GameCard game={game} />
+            <div className="card h-100">
+              <img src={game.image} className="card-img-top" alt={game.title} />
+              <div className="card-body">
+                <h5 className="card-title">{game.title}</h5>
+                <p className="text-muted">{game.genre}</p>
+                <p className="text-success">${game.price}</p>
+                <Link to={`/game/${game.id}`} className="btn btn-dark w-100">View</Link>
+              </div>
+            </div>
           </div>
         ))}
       </div>
 
-      {/* Request a Game Form */}
-      <div className="mt-5">
-        <h3>Can't find a game? Request it!</h3>
-        {submitted ? (
-          <div className="alert alert-success">Request submitted!</div>
-        ) : (
-          <form onSubmit={handleRequest} className="mt-3" style={{ maxWidth: '500px' }}>
-            <div className="mb-3">
-              <label className="form-label">Game Title</label>
-              <input
-                className={`form-control ${errors.title ? 'is-invalid' : ''}`}
-                value={request.title}
-                onChange={e => setRequest({ ...request, title: e.target.value })}
-              />
-              {errors.title && <div className="invalid-feedback">{errors.title}</div>}
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Platform</label>
-              <input
-                className={`form-control ${errors.platform ? 'is-invalid' : ''}`}
-                placeholder="PC, PS5, Xbox..."
-                value={request.platform}
-                onChange={e => setRequest({ ...request, platform: e.target.value })}
-              />
-              {errors.platform && <div className="invalid-feedback">{errors.platform}</div>}
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Reason (optional)</label>
-              <textarea
-                className="form-control"
-                value={request.reason}
-                onChange={e => setRequest({ ...request, reason: e.target.value })}
-              />
-            </div>
-            <button type="submit" className="btn btn-success">Submit Request</button>
-          </form>
-        )}
-      </div>
+      {/* Request a Game Form — to be added */}
     </div>
   )
 }
@@ -520,7 +467,32 @@ export default OrderHistory
 
 ---
 
-## Step 5 — GameCard Reusable Component
+## Data File — src/data/games.js
+
+Instead of hardcoding the games array in every page, keep it in one place:
+
+```js
+import cupheadImg from "../assets/Cuphead.jpg"
+import eldenImg from "../assets/eldenring.jpg"
+import GoWImg from "../assets/GoW.jpg"
+import cyberImg from "../assets/cyberpunk.jpg"
+
+const games = [
+  { id: 1, title: "Cuphead", price: 19.99, genre: "Run and Gun Action", image: cupheadImg },
+  { id: 2, title: "Elden Ring", price: 59.99, genre: "Action RPG", image: eldenImg },
+  { id: 3, title: "God of War", price: 49.99, genre: "Action-Adventure", image: GoWImg },
+  { id: 4, title: "CyberPunk 2077", price: 59.99, genre: "RPG", image: cyberImg },
+]
+
+export default games
+```
+
+Import it in any page with:
+```js
+import games from '../data/games'
+```
+
+---
 
 Used in both Home and Catalog pages:
 
@@ -559,6 +531,78 @@ const games = [
 ]
 setGames(games)
 ```
+
+---
+
+## Bootstrap Layout Classes Reference
+
+### Containers
+| Class | What it does |
+|---|---|
+| `container` | Centers content with a max width, adds padding on sides |
+| `row` | Starts a grid row, children sit side by side |
+| `col-md-3` | Each item takes 3/12 columns on desktop (4 per row), full width on mobile |
+| `col-md-4` | Each item takes 4/12 columns (3 per row) |
+| `col-md-6` | Each item takes 6/12 columns (2 per row) |
+
+### Flexbox
+| Class | What it does |
+|---|---|
+| `d-flex` | Turns div into a flex container, enables alignment control |
+| `justify-content-center` | Centers children horizontally |
+| `justify-content-between` | Pushes children to opposite ends |
+| `align-items-center` | Centers children vertically |
+| `gap-3` | Adds spacing between flex children |
+
+### Spacing
+| Class | What it does |
+|---|---|
+| `my-5` | Margin top and bottom (size 5) |
+| `mb-4` | Margin bottom only (size 4) |
+| `mt-5` | Margin top only |
+| `py-5` | Padding top and bottom |
+| `px-4` | Padding left and right |
+| `me-2` | Margin right (end) |
+
+### Input Group
+| Class | What it does |
+|---|---|
+| `input-group` | Wrapper that glues input and attached elements together |
+| `input-group-text` | The attached element (icon or text) on left or right of input |
+| `form-control` | Styles an input field |
+| `form-label` | Styles a label above an input |
+
+### Cards
+| Class | What it does |
+|---|---|
+| `card` | Bootstrap card box with border and shadow |
+| `card-body` | Padding inside the card |
+| `card-title` | Styled heading inside card |
+| `card-img-top` | Image at top of card, stretches to fit width |
+| `h-100` | Makes card full height so all cards in a row are equal height |
+
+### Text & Color
+| Class | What it does |
+|---|---|
+| `text-white` | White text |
+| `text-muted` | Grey text |
+| `text-success` | Green text |
+| `text-center` | Centers text |
+| `text-end` | Aligns text to the right |
+| `bg-dark` | Dark background |
+| `lead` | Slightly larger paragraph text |
+
+### Buttons
+| Class | What it does |
+|---|---|
+| `btn` | Base button style, always required |
+| `btn-success` | Green button |
+| `btn-dark` | Dark button |
+| `btn-danger` | Red button |
+| `btn-outline-light` | Transparent button with light border |
+| `btn-lg` | Large button |
+| `btn-sm` | Small button |
+| `w-100` | Full width button |
 
 ---
 
