@@ -16,8 +16,9 @@ router.post('/register', async (req, res) => {
     const user = await User.create({ name, email, password: hashedPassword });
 
     const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const role = user.isAdmin ? 'admin' : 'user'
 
-    res.status(201).json({ success: true, data: { token, name: user.name, email: user.email } });
+    res.status(201).json({ success: true, data: { token, name: user.name, email: user.email, role } });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -35,8 +36,9 @@ router.post('/login', async (req, res) => {
     if (!match) return res.status(400).json({ success: false, message: 'Invalid credentials' });
 
     const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const role = user.isAdmin ? 'admin' : 'user'
 
-    res.json({ success: true, data: { token, name: user.name, email: user.email } });
+    res.json({ success: true, data: { token, name: user.name, email: user.email, role } });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
