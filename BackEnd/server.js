@@ -13,7 +13,9 @@ app.use('/api/games',  require('./routes/games'));
 app.use('/api/cart',   require('./routes/cart'));
 app.use('/api/orders', require('./routes/orders'));
 
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI, {
+  tlsAllowInvalidCertificates: true
+})
   .then(() => {
     console.log('MongoDB connected');
     app.listen(process.env.PORT, () => {
