@@ -24,10 +24,13 @@ FrontEnd/
 │   │   ├── Navbar.jsx
 │   │   ├── Footer.jsx
 │   │   └── GameCard.jsx
-│   ├── pages/             ← your 3 pages
+│   ├── context/
+│   │   └── AuthContext.jsx  ← auth state (token, name, role, isAdmin)
+│   ├── pages/
 │   │   ├── Home.jsx
 │   │   ├── Catalog.jsx
-│   │   └── GameDetails.jsx
+│   │   ├── GameDetails.jsx
+│   │   └── AdminDashboard.jsx
 │   ├── App.jsx            ← routing lives here
 │   └── main.jsx           ← entry point (like main.ts in Angular)
 ```
@@ -297,6 +300,43 @@ git add .
 git commit -m "add home page hero section"
 git push origin frontend-dev
 ```
+
+---
+
+## Admin Dashboard
+
+### Setup
+Add this route in `App.jsx`:
+```jsx
+import AdminDashboard from './pages/AdminDashboard'
+
+// inside <Routes>:
+<Route path="/admin" element={<AdminDashboard />} />
+```
+
+### AuthContext — login() now takes 3 args
+```jsx
+const { token, name, role } = res.data.data
+login(token, name, role)  // role must be "admin" or "user"
+```
+
+`AuthContext` exposes `isAdmin` (boolean) — `true` when `role === 'admin'`. The Navbar uses this to show/hide the Admin button.
+
+### Features
+- **Manage Games tab** — table of all games with Edit (inline expand) and Delete per row
+- **Add Game tab** — form to add a new game, calls `POST /api/games`
+- Edit calls `PUT /api/games/:id`, Delete calls `DELETE /api/games/:id`
+- Both mutating calls send `Authorization: Bearer <token>` header
+- Non-admins are automatically redirected to `/`
+
+### Testing Admin Locally (before backend sets role)
+Open DevTools → Application → Local Storage → `localhost:5173` and set:
+```
+key:   role
+value: admin
+```
+Refresh the page — the Admin button will appear in the Navbar.
+To undo, delete the key or set value back to `user`.
 
 ---
 

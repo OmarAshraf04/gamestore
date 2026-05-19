@@ -3,7 +3,12 @@ import { Link } from 'react-router-dom'
 function GameCard({ game }) {
   return (
     <div className="card h-100">
-      <img src={game.image} className="card-img-top" alt={game.title} />
+      <img
+        src={game.image}
+        className="card-img-top"
+        alt={game.title}
+        style={{ height: '250px', objectFit: 'contain', background: '#f8f9fa' }}
+      />
       <div className="card-body">
         <h5 className="card-title">{game.title}</h5>
         <p className="text-muted">{game.category}</p>

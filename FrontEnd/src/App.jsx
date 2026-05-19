@@ -6,6 +6,7 @@ import GameDetails from './pages/GameDetails'
 import Cart from './pages/Cart'
 import Login from './pages/Login'
 import OrderHistory from './pages/OrderHistory'
+import AdminDashboard from './pages/AdminDashboard'
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/login" element={<Login />} />
         <Route path="/orders" element={<OrderHistory />} />
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </BrowserRouter>
   )

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 function Login() {
   const [isLogin, setIsLogin] = useState(true)
@@ -8,6 +9,7 @@ function Login() {
   const [errors, setErrors] = useState({})
   const [message, setMessage] = useState('')
   const navigate = useNavigate()
+  const { login } = useAuth()
 
   const validate = () => {
     const newErrors = {}
@@ -37,11 +39,8 @@ function Login() {
         : { name: form.name, email: form.email, password: form.password }
 
       const res = await axios.post(url, payload)
-      const { token, name } = res.data.data
-
-      localStorage.setItem('token', token)
-      localStorage.setItem('name', name)
-
+      const { token, name, role } = res.data.data
+      login(token, name, role)
       navigate('/')
     } catch (err) {
       setMessage(err.response?.data?.message || 'Something went wrong')
