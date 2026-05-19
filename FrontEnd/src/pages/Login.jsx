@@ -1,10 +1,13 @@
 import { useState } from 'react'
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 
 function Login() {
   const [isLogin, setIsLogin] = useState(true)
   const [form, setForm] = useState({ name: '', email: '', password: '' })
   const [errors, setErrors] = useState({})
   const [message, setMessage] = useState('')
+  const navigate = useNavigate()
 
   const validate = () => {
     const newErrors = {}
@@ -16,14 +19,33 @@ function Login() {
     return newErrors
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const newErrors = validate()
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
       return
     }
-    setMessage(isLogin ? 'Logged in!' : 'Registered successfully!')
+
+    try {
+      const url = isLogin
+        ? 'http://localhost:5000/api/auth/login'
+        : 'http://localhost:5000/api/auth/register'
+
+      const payload = isLogin
+        ? { email: form.email, password: form.password }
+        : { name: form.name, email: form.email, password: form.password }
+
+      const res = await axios.post(url, payload)
+      const { token, name } = res.data.data
+
+      localStorage.setItem('token', token)
+      localStorage.setItem('name', name)
+
+      navigate('/')
+    } catch (err) {
+      setMessage(err.response?.data?.message || 'Something went wrong')
+    }
   }
 
   return (
@@ -35,7 +57,7 @@ function Login() {
 
       <h3>{isLogin ? 'Login' : 'Create Account'}</h3>
 
-      {message && <div className="alert alert-success">{message}</div>}
+      {message && <div className="alert alert-danger">{message}</div>}
 
       <form onSubmit={handleSubmit} className="mt-3">
         {!isLogin && (

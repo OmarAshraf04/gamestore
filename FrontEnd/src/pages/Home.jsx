@@ -1,8 +1,16 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import games from '../data/game'
+import axios from 'axios'
 import GameCard from '../components/GameCard'
 
 function Home() {
+  const [games, setGames] = useState([])
+
+  useEffect(() => {
+    axios.get('http://localhost:5000/api/games')
+      .then(res => setGames(res.data.data))
+      .catch(err => console.error(err))
+  }, [])
 
   return (
     <div>
@@ -18,7 +26,7 @@ function Home() {
         <h2 className="mb-4">Featured Games</h2>
         <div className="row">
           {games.map(game => (
-            <div className="col-md-3 mb-4" key={game.id}>
+            <div className="col-md-3 mb-4" key={game._id}>
               <GameCard game={game} />
             </div>
           ))}
