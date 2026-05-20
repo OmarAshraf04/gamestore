@@ -68,9 +68,9 @@ function GameDetails() {
   if (!game) return <p className="text-center mt-5">Loading...</p>
 
   const media = [
-    ...(game.media?.filter(m => m.type === 'video') || []),
     { type: 'image', url: game.image || 'https://placehold.co/800x450' },
-    { type: 'image', url: 'https://placehold.co/800x450?text=Screenshot+2' },
+    ...(game.media?.filter(m => m.type === 'video') || []),
+    ...(game.screenshots?.map(url => ({ type: 'image', url })) || []),
   ]
 
   const current = media[activeIndex]
