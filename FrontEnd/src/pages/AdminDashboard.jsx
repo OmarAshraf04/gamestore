@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { Trash2, PlusCircle, LayoutDashboard, PackagePlus, Pencil, X, Check } from 'lucide-react'
 import React from 'react'
 
-const EMPTY_FORM = { title: '', price: '', category: '', description: '', image: '' }
+const EMPTY_FORM = { title: '', price: '', category: '', description: '', image: '', videoUrl: '', screenshot: '', rating: '' }
 
 function AdminDashboard() {
   const { isAdmin, token } = useAuth()
@@ -24,12 +24,10 @@ function AdminDashboard() {
   const [editForm, setEditForm] = useState({})
   const [saving, setSaving] = useState(false)
 
-  // Redirect non-admins
   useEffect(() => {
     if (!isAdmin) navigate('/')
   }, [isAdmin, navigate])
 
-  // Fetch all games
   const fetchGames = () => {
     setLoadingGames(true)
     axios.get('http://localhost:5000/api/games')
@@ -42,7 +40,6 @@ function AdminDashboard() {
     fetchGames()
   }, [])
 
-  // Delete game
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this game?')) return
     setDeletingId(id)
@@ -58,7 +55,6 @@ function AdminDashboard() {
     }
   }
 
-  // Open edit row
   const handleEdit = (game) => {
     setEditingId(game._id)
     setEditForm({
@@ -66,21 +62,31 @@ function AdminDashboard() {
       price: game.price,
       category: game.category,
       description: game.description,
-      image: game.image
+      image: game.image,
+      videoUrl: game.media?.find(m => m.type === 'video')?.url || '',
+      screenshot: game.screenshots?.[0] || '',
+      rating: game.rating || 0
     })
   }
 
-  // Save edited game
   const handleSave = async (id) => {
     setSaving(true)
     try {
       await axios.put(`http://localhost:5000/api/games/${id}`, {
         ...editForm,
-        price: parseFloat(editForm.price)
+        price: parseFloat(editForm.price),
+        media: editForm.videoUrl ? [{ type: 'video', url: editForm.videoUrl }] : [],
+        screenshots: editForm.screenshot ? [editForm.screenshot] : []
       }, {
         headers: { Authorization: `Bearer ${token}` }
       })
-      setGames(prev => prev.map(g => g._id === id ? { ...g, ...editForm, price: parseFloat(editForm.price) } : g))
+      setGames(prev => prev.map(g => g._id === id ? {
+        ...g,
+        ...editForm,
+        price: parseFloat(editForm.price),
+        media: editForm.videoUrl ? [{ type: 'video', url: editForm.videoUrl }] : [],
+        screenshots: editForm.screenshot ? [editForm.screenshot] : []
+      } : g))
       setEditingId(null)
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to update game')
@@ -89,7 +95,6 @@ function AdminDashboard() {
     }
   }
 
-  // Validate add form
   const validate = () => {
     const errs = {}
     if (!form.title.trim()) errs.title = 'Title is required'
@@ -100,7 +105,6 @@ function AdminDashboard() {
     return errs
   }
 
-  // Add game
   const handleAdd = async (e) => {
     e.preventDefault()
     const errs = validate()
@@ -112,7 +116,9 @@ function AdminDashboard() {
     try {
       await axios.post('http://localhost:5000/api/games', {
         ...form,
-        price: parseFloat(form.price)
+        price: parseFloat(form.price),
+        media: form.videoUrl ? [{ type: 'video', url: form.videoUrl }] : [],
+        screenshots: form.screenshot ? [form.screenshot] : []
       }, {
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -137,7 +143,6 @@ function AdminDashboard() {
       </h2>
       <p className="text-muted mb-4">Manage your game store inventory</p>
 
-      {/* Tabs */}
       <ul className="nav nav-tabs mb-4">
         <li className="nav-item">
           <button
@@ -160,7 +165,6 @@ function AdminDashboard() {
         </li>
       </ul>
 
-      {/* Tab: Manage Games */}
       {activeTab === 'manage' && (
         <div>
           {loadingGames ? (
@@ -261,6 +265,36 @@ function AdminDashboard() {
                                     onChange={e => setEditForm({ ...editForm, image: e.target.value })}
                                   />
                                 </div>
+                                <div className="col-md-4">
+                                  <label className="form-label small mb-1">Trailer URL</label>
+                                  <input
+                                    className="form-control form-control-sm"
+                                    value={editForm.videoUrl || ''}
+                                    onChange={e => setEditForm({ ...editForm, videoUrl: e.target.value })}
+                                    placeholder="https://www.youtube.com/embed/..."
+                                  />
+                                </div>
+                                <div className="col-md-4">
+                                  <label className="form-label small mb-1">Screenshot URL</label>
+                                  <input
+                                    className="form-control form-control-sm"
+                                    value={editForm.screenshot || ''}
+                                    onChange={e => setEditForm({ ...editForm, screenshot: e.target.value })}
+                                    placeholder="https://..."
+                                  />
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label small mb-1">Rating</label>
+                                  <input
+                                    type="number"
+                                    step="0.1"
+                                    min="0"
+                                    max="5"
+                                    className="form-control form-control-sm"
+                                    value={editForm.rating || 0}
+                                    onChange={e => setEditForm({ ...editForm, rating: e.target.value })}
+                                  />
+                                </div>
                               </div>
                               <div className="mb-2">
                                 <label className="form-label small mb-1">Description</label>
@@ -292,7 +326,6 @@ function AdminDashboard() {
         </div>
       )}
 
-      {/* Tab: Add Game */}
       {activeTab === 'add' && (
         <div style={{ maxWidth: '550px' }}>
           {successMsg && <div className="alert alert-success">{successMsg}</div>}
@@ -354,7 +387,7 @@ function AdminDashboard() {
               {formErrors.description && <div className="invalid-feedback">{formErrors.description}</div>}
             </div>
 
-            <div className="mb-4">
+            <div className="mb-3">
               <label className="form-label">Image URL</label>
               <input
                 className={`form-control ${formErrors.image ? 'is-invalid' : ''}`}
@@ -372,6 +405,49 @@ function AdminDashboard() {
                   onError={e => e.target.style.display = 'none'}
                 />
               )}
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Trailer URL (YouTube Embed)</label>
+              <input
+                className="form-control"
+                value={form.videoUrl}
+                onChange={e => setForm({ ...form, videoUrl: e.target.value })}
+                placeholder="https://www.youtube.com/embed/VIDEO_ID"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="form-label">Screenshot URL</label>
+              <input
+                className="form-control"
+                value={form.screenshot}
+                onChange={e => setForm({ ...form, screenshot: e.target.value })}
+                placeholder="https://..."
+              />
+              {form.screenshot && (
+                <img
+                  src={form.screenshot}
+                  alt="Screenshot Preview"
+                  className="mt-2 rounded"
+                  style={{ width: '100%', maxHeight: '160px', objectFit: 'cover' }}
+                  onError={e => e.target.style.display = 'none'}
+                />
+              )}
+            </div>
+
+            <div className="mb-4">
+              <label className="form-label">Rating</label>
+              <input
+                type="number"
+                step="0.1"
+                min="0"
+                max="5"
+                className="form-control"
+                value={form.rating}
+                onChange={e => setForm({ ...form, rating: e.target.value })}
+                placeholder="e.g. 4.5"
+              />
             </div>
 
             <button type="submit" className="btn btn-success w-100" disabled={submitting}>

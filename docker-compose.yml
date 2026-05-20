@@ -1,0 +1,26 @@
+services:
+  backend:
+    build:
+      context: ./BackEnd
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb+srv://magdy:gaming@c-0.d0l0ilg.mongodb.net/?appName=C-0
+      - JWT_SECRET=somereallylongrandomsecretkey123
+    networks:
+      - gamestore
+
+  frontend:
+    build:
+      context: ./FrontEnd
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - gamestore
+
+networks:
+  gamestore:
+    driver: bridge
